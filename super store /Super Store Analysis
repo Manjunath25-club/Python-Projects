@@ -1,0 +1,206 @@
+Q1) Calculate monthly sales of the store and identify which month had highest sales and lowest sales
+
+Ans - highest sales in nov and lowest in feb
+
+Q2) Analyse sales based on product categories and determine which category has the lowest sales and which has highest
+
+Q3) Sales analysis needs to be done based on sub-categories
+
+Q4) Analyze the monthly profit from sales and determine which month had the highest profit
+
+Q5) Analyze profit by category and sub-category
+
+Q6) Analyze sales and profit by customer segment
+
+Q7) Analyze the sales to profit ratio
+
+
+---------------------------------------------------------------------------------------
+import numpy as np
+import pandas as pd
+from pandas import DataFrame
+import seaborn as sns
+
+--------------------------------------------------
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+pio.templates.default = "plotly_white"
+-------------------------------------------------------
+
+ import plotly.express as px # we can create plots easily and quickly
+import plotly.graph_objects as go # Advanced and customizable graphs
+import plotly.io as pio # Customize our graphs
+pio.templates.default = "plotly_white"
+
+
+
+-------------------------------------------------
+data = pd.read_csv('/content/Sample - Superstore.csv' , encoding= 'latin-1')
+data.head()
+
+
+------------------------------------------
+data.describe()
+
+
+---------------------------------------------------
+data.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 9994 entries, 0 to 9993
+Data columns (total 21 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   Row ID         9994 non-null   int64  
+ 1   Order ID       9994 non-null   object 
+ 2   Order Date     9994 non-null   object 
+ 3   Ship Date      9994 non-null   object 
+ 4   Ship Mode      9994 non-null   object 
+ 5   Customer ID    9994 non-null   object 
+ 6   Customer Name  9994 non-null   object 
+ 7   Segment        9994 non-null   object 
+ 8   Country        9994 non-null   object 
+ 9   City           9994 non-null   object 
+ 10  State          9994 non-null   object 
+ 11  Postal Code    9994 non-null   int64  
+ 12  Region         9994 non-null   object 
+ 13  Product ID     9994 non-null   object 
+ 14  Category       9994 non-null   object 
+ 15  Sub-Category   9994 non-null   object 
+ 16  Product Name   9994 non-null   object 
+ 17  Sales          9994 non-null   float64
+ 18  Quantity       9994 non-null   int64  
+ 19  Discount       9994 non-null   float64
+ 20  Profit         9994 non-null   float64
+dtypes: float64(3), int64(3), object(15)
+memory usage: 1.6+ MB
+
+------------------------------------------------------------
+# converting data Type
+data["Order Date"]=pd.to_datetime(  data["Order Date"]   )
+data["Ship Date"]=pd.to_datetime(  data["Ship Date"]   )
+
+
+---------------------------------------------------------------
+data.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 9994 entries, 0 to 9993
+Data columns (total 22 columns):
+ #   Column         Non-Null Count  Dtype         
+---  ------         --------------  -----         
+ 0   Row ID         9994 non-null   int64         
+ 1   Order ID       9994 non-null   object        
+ 2   Order Date     9994 non-null   datetime64[ns]
+ 3   Ship Date      9994 non-null   datetime64[ns]
+ 4   Ship Mode      9994 non-null   object        
+ 5   Customer ID    9994 non-null   object        
+ 6   Customer Name  9994 non-null   object        
+ 7   Segment        9994 non-null   object        
+ 8   Country        9994 non-null   object        
+ 9   City           9994 non-null   object        
+ 10  State          9994 non-null   object        
+ 11  Postal Code    9994 non-null   int64         
+ 12  Region         9994 non-null   object        
+ 13  Product ID     9994 non-null   object        
+ 14  Category       9994 non-null   object        
+ 15  Sub-Category   9994 non-null   object        
+ 16  Product Name   9994 non-null   object        
+ 17  Sales          9994 non-null   float64       
+ 18  Quantity       9994 non-null   int64         
+ 19  Discount       9994 non-null   float64       
+ 20  Profit         9994 non-null   float64       
+ 21  Order Data     9994 non-null   datetime64[ns]
+dtypes: datetime64[ns](3), float64(3), int64(3), object(13)
+memory usage: 1.7+ MB
+
+------------------------------------------------------------
+# Adding new  coloumns to Answer Q1
+data["Order Month"] = data["Order Date"].dt.month
+data["Order Year"] = data["Order Date"].dt.year
+data["Order Day of Week"] = data["Order Date"].dt.dayofweek
+
+
+
+-------------------------------------------
+data
+
+
+----------------------------------------------------------------------
+sales_By_Month=data.groupby("Order Month")["Sales"].sum().reset_index()
+sales_By_Month
+
+
+
+------------------------------------------------------------
+fig=px.line(sales_By_Month,
+        x = 'Order Month',
+        y = 'Sales',
+        title='Monthly Sales Analysis'
+        )
+fig.show()
+
+----------------------------------------------------------------------
+sales_By_category=data.groupby("Category")["Sales"].sum().reset_index();
+sales_By_category
+
+-------------------------------------------------------------------------------
+fig = px.pie(sales_By_category,
+       values = 'Sales',
+       names ='Category'
+       )
+fig.show()
+
+--------------------------------------------------------------------------------
+sales_By_profit=data.groupby("Order Month")["Profit"].sum().reset_index();
+sales_By_profit
+
+
+----------------------------------------------------------------------------------
+fig = px.line(sales_By_profit,
+             x = 'Order Month',
+             y = 'Profit',
+             title= "profit_Analysis")
+fig.show()
+-------------------------------------------------------------------------------------
+sale_By_subCategory= data.groupby("Sub-Category")["Sales"].sum().reset_index();
+sale_By_subCategory
+
+----------------------------------------------------------------------------------------
+fig= px.bar(sale_By_subCategory,
+       x = 'Sub-Category',
+       y = 'Sales',
+       title="sale_By_subCategory")
+fig.show()
+
+------------------------------------------------------------------------------
+Profirt_by_Category = data.groupby(["Category","Sub-Category"])["Profit"].agg(sum).reset_index();
+Profirt_by_Category
+
+
+--------------------------------------------------------------------------------------------------------------
+sales_profit_by_segment = data.groupby("Segment").agg(  {  "Sales" : "sum" , "Profit" : "sum"  } ).reset_index();
+
+fig = go.Figure()
+
+fig.add_trace(  go.Bar(
+   x =     sales_profit_by_segment["Segment"],
+   y =  sales_profit_by_segment['Sales'],
+   name = 'Sales'
+ ) )
+
+fig.add_trace(  go.Bar(
+   x =     sales_profit_by_segment["Segment"],
+   y =  sales_profit_by_segment['Profit'],
+   name = 'Profit'
+ ) )
+
+
+fig.show()
+----------------------------------------------------------------
+Sales_Profit_by_Segement= data.groupby("Segment").agg({"Sales":"sum","Profit":"sum"}).reset_index();
+Sales_Profit_by_Segement["Sales_Profit_Ratio"] = Sales_Profit_by_Segement["Sales"]/Sales_Profit_by_Segement["Profit"];
+print(Sales_Profit_by_Segement[["Segment","Sales_Profit_Ratio"]])
+       Segment  Sales_Profit_Ratio
+0     Consumer            8.659471
+1    Corporate            7.677245
+2  Home Office            7.125416
