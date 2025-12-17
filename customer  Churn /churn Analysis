@@ -1,0 +1,102 @@
+import pandas as pd
+import numpy as np
+from pandas import DataFrame, Series
+import seaborn as sns
+
+import plotly.express as px # we can create plots easily and quickly
+import plotly.graph_objects as go # Advanced and customizable graphs
+import plotly.io as pio # Customize our graphs
+pio.templates.default = "plotly_white"
+
+import matplotlib.pyplot as plt
+-----------------------------------------------------------------
+
+df=pd.read_csv("/content/Customer Churn.csv");
+df.head()
+---------------------------------------------
+df.describe()
+---------------------------------------
+df.info()
+---------------------------------------------
+df["TotalCharges"].value_counts()
+--------------------------------------------
+df["TotalCharges"]=df["TotalCharges"].replace(" ","0")
+df["TotalCharges"]=df["TotalCharges"].astype("float")
+------------------------------------------------------
+df.info()
+--------------------------------------------------------
+df["customerID"].duplicated().sum()
+-------------------------------------------------------------------
+def concert_values(value):
+  if value ==1:
+    return "Yes"
+  else:
+    return "No"
+df["SeniorCitizen"]=df["SeniorCitizen"].apply(concert_values)
+----------------------------------------------------------------------------------
+df.head()
+-------------------------------------------------------------------------------------
+ax=sns.countplot(x='Churn',data=df)
+ax.bar_label(ax.containers[0])
+plt.title("Count of customers by churn")
+plt.show()
+-------------------------------------------------------
+# Calculate percentage
+churn_perc = df['Churn'].value_counts(normalize=True) * 100
+
+# Pie chart
+plt.figure(figsize=(6,6))
+plt.pie(
+    churn_perc,
+    labels=churn_perc.index,
+    autopct='%.1f%%',
+    startangle=90
+)
+
+plt.title("Customer Churn Percentage")
+plt.show()
+--------------------------------------------------------------------------
+sns.countplot(x='gender',data=df,hue="Churn")
+plt.title("Churn by Gender")
+plt.show()
+-------------------------------------------------------------------
+ax=sns.countplot(x="SeniorCitizen",data=df,hue="Churn");
+ax.bar_label(ax.containers[0])
+plt.title("Count of Customers by Senior Citizen")
+plt.show()
+--------------------------------------------------------
+plt.figure(figsize=(9,6))
+sns.histplot(x="tenure",data=df,bins=72,hue="Churn")
+plt.show()
+-------------------------------------------------------------------
+df["Contract"].value_counts()
+---------------------------------------------------------------------
+ax=sns.countplot(x="Contract",data=df,hue="Churn")
+ax.bar_label(ax.containers[0])
+plt.title("Count of Customers by Contract")
+plt.show()
+------------------------------------------------------
+df.columns
+------------------------------------------------------------------
+cols = [
+    'PhoneService', 'MultipleLines', 'InternetService',
+    'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+    'TechSupport', 'StreamingTV', 'StreamingMovies'
+]
+-------------------------------------------------------------
+plt.figure(figsize=(18, 12))
+
+for i, col in enumerate(cols, 1):
+    plt.subplot(3, 3, i)
+    ax = sns.countplot(x=col, data=df , hue = "Churn"  )
+    ax.bar_label(ax.containers[0])
+    plt.title(col)
+    plt.xticks(rotation=30)
+
+plt.tight_layout()
+plt.show()
+------------------------------------------------------------------------
+sns.countplot(x="PaymentMethod", data=df, hue="Churn")
+plt.title("Churned Customers by payment method")
+plt.xticks(rotation = 45)
+
